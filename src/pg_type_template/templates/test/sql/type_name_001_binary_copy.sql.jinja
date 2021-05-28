@@ -1,0 +1,12 @@
+\t
+CREATE EXTENSION {{ type_name }};
+
+CREATE TABLE {{ type_name }}_table (v {{ type_name }});
+
+COPY (SELECT unnest(n::{{ type_name }}[])
+	FROM {{ type_name }}_get_list() s(n))
+	TO '/tmp/tst' WITH (FORMAT binary);
+COPY {{ type_name }}_table
+	FROM '/tmp/tst' WITH (FORMAT binary);
+
+SELECT * FROM {{ type_name }}_table;

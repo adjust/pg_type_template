@@ -1,0 +1,6 @@
+\t
+SELECT v::text::{{ type_name }}
+FROM {{ type_name }}_table;
+
+SELECT 'invalid_name'::{{ type_name }};
+SELECT ''::{{ type_name }};

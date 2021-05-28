@@ -1,0 +1,14 @@
+EXTENSION = {{ ext_name }}
+PG_CONFIG ?= pg_config
+
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+MODULE_big = {{ ext_name }}
+
+DATA = $(wildcard *--*.sql)
+OBJS = $(patsubst %.c,%.o,$(wildcard src/*.c))
+
+TESTS        = $(sort $(wildcard test/sql/*.sql))
+REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
+REGRESS_OPTS = --inputdir=test --outputdir=test
+
+include $(PGXS)

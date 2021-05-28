@@ -1,0 +1,16 @@
+\t
+SELECT v::text::{{ type_name }}
+FROM {{ type_name }}_table;
+{% for item in type_values %}
+ {{ item.name }}
+{% endfor %}
+
+SELECT 'invalid_name'::{{ type_name }};
+ERROR:  unknown input value: invalid_name
+LINE 1: SELECT 'invalid_name'::{{ type_name }};
+               ^
+SELECT ''::{{ type_name }};
+ERROR:  unknown input value: 
+LINE 1: SELECT ''::{{ type_name }};
+               ^
+

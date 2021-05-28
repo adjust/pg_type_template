@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [13, 12, 11, 10]
+    name: 🐘 PostgreSQL ${{ matrix.pg }}
+    runs-on: ubuntu-latest
+    container: zilder/pg-ext-check
+    steps:
+      - run: pg-setup ${{ matrix.pg }}
+      - uses: actions/checkout@v2
+      - run: build-check
