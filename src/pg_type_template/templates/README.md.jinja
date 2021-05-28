@@ -1,0 +1,13 @@
+# {{ ext_name }}
+
+A {{ ext_name }} extension for postgres
+
+{% for type in types %}
+## {{ type.type_name }} functions
+
+```sql
+{{ type.type_name }}_get_list() RETURNS text[]
+```
+
+Returns the array of available values.
+{% endfor %}

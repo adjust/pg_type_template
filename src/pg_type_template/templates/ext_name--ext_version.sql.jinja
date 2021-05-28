@@ -1,0 +1,202 @@
+{% for type in types %}
+
+-- {{ type.type_name }} definition
+
+CREATE FUNCTION {{ type.type_name }}_in(cstring)
+RETURNS {{ type.type_name }}
+AS 'MODULE_PATHNAME'
+LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_out({{ type.type_name }})
+RETURNS cstring
+AS 'MODULE_PATHNAME'
+LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_recv(internal)
+RETURNS {{ type.type_name }}
+AS 'MODULE_PATHNAME'
+LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_send({{ type.type_name }})
+RETURNS bytea
+AS 'MODULE_PATHNAME'
+LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE TYPE {{ type.type_name }} (
+	INPUT     = {{ type.type_name }}_in,
+	OUTPUT    = {{ type.type_name }}_out,
+	RECEIVE   = {{ type.type_name }}_recv,
+	SEND      = {{ type.type_name }}_send,
+	LIKE      = "char",
+	CATEGORY  = 'S'
+);
+COMMENT ON TYPE {{ type.type_name }} IS 'an {{ type.type_name }} internaly stored as uint8';
+
+-- Operators for {{ type.type_name }}
+
+CREATE FUNCTION {{ type.type_name }}_eq({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'chareq'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_ne({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'charne'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_lt({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'charlt'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_le({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'charle'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_gt({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'chargt'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_ge({{ type.type_name }}, {{ type.type_name }})
+RETURNS boolean
+AS 'charge'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION {{ type.type_name }}_cmp({{ type.type_name }}, {{ type.type_name }})
+RETURNS integer
+AS 'btcharcmp'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE FUNCTION hash_{{ type.type_name }}({{ type.type_name }})
+RETURNS integer
+AS 'hashchar'
+LANGUAGE internal IMMUTABLE STRICT PARALLEL SAFE;
+
+CREATE OPERATOR = (
+	LEFTARG = {{ type.type_name }},
+	RIGHTARG = {{ type.type_name }},
+	PROCEDURE = {{ type.type_name }}_eq,
+	COMMUTATOR = '=',
+	NEGATOR = '<>',
+	RESTRICT = eqsel,
+	JOIN = eqjoinsel,
+	HASHES, MERGES
+);
+COMMENT ON OPERATOR =({{ type.type_name }}, {{ type.type_name }}) IS 'equals?';
+
+CREATE OPERATOR <> (
+	LEFTARG = {{ type.type_name }},
+	RIGHTARG = {{ type.type_name }},
+	PROCEDURE = {{ type.type_name }}_ne,
+	COMMUTATOR = '<>',
+	NEGATOR = '=',
+	RESTRICT = neqsel,
+	JOIN = neqjoinsel
+);
+COMMENT ON OPERATOR <>({{ type.type_name }}, {{ type.type_name }}) IS 'not equals?';
+
+CREATE OPERATOR < (
+	LEFTARG = {{ type.type_name }},
+	RIGHTARG = {{ type.type_name }},
+	PROCEDURE = {{ type.type_name }}_lt,
+	COMMUTATOR = > ,
+	NEGATOR = >= ,
+	RESTRICT = scalarltsel,
+	JOIN = scalarltjoinsel
+);
+COMMENT ON OPERATOR <({{ type.type_name }}, {{ type.type_name }}) IS 'less-than';
+
+CREATE OPERATOR > (
+	LEFTARG = {{ type.type_name }},
+	RIGHTARG = {{ type.type_name }},
+	PROCEDURE = {{ type.type_name }}_gt,
+	COMMUTATOR = < ,
+	NEGATOR = <= ,
+	RESTRICT = scalargtsel,
+	JOIN = scalargtjoinsel
+);
+COMMENT ON OPERATOR >({{ type.type_name }}, {{ type.type_name }}) IS 'greater-than';
+
+-- Postgres 11 has more optimal RESTRICT and JOIN selectivity estimation functions
+DO $$
+DECLARE version_num integer;
+BEGIN
+	SELECT current_setting('server_version_num') INTO STRICT version_num;
+	IF version_num < 110000 THEN
+
+		CREATE OPERATOR <= (
+			LEFTARG = {{ type.type_name }},
+			RIGHTARG = {{ type.type_name }},
+			PROCEDURE = {{ type.type_name }}_le,
+			COMMUTATOR = >= ,
+			NEGATOR = > ,
+			RESTRICT = scalarltsel,
+			JOIN = scalarltjoinsel
+		);
+		COMMENT ON OPERATOR <=({{ type.type_name }}, {{ type.type_name }}) IS 'less-than-or-equal';
+
+		CREATE OPERATOR >= (
+			LEFTARG = {{ type.type_name }},
+			RIGHTARG = {{ type.type_name }},
+			PROCEDURE = {{ type.type_name }}_ge,
+			COMMUTATOR = <= ,
+			NEGATOR = < ,
+			RESTRICT = scalargtsel,
+			JOIN = scalargtjoinsel
+		);
+		COMMENT ON OPERATOR >=({{ type.type_name }}, {{ type.type_name }}) IS 'greater-than-or-equal';
+
+	ELSE
+
+		CREATE OPERATOR <= (
+			LEFTARG = {{ type.type_name }},
+			RIGHTARG = {{ type.type_name }},
+			PROCEDURE = {{ type.type_name }}_le,
+			COMMUTATOR = >= ,
+			NEGATOR = > ,
+			RESTRICT = scalarlesel,
+			JOIN = scalarlejoinsel
+		);
+		COMMENT ON OPERATOR <=({{ type.type_name }}, {{ type.type_name }}) IS 'less-than-or-equal';
+
+		CREATE OPERATOR >= (
+			LEFTARG = {{ type.type_name }},
+			RIGHTARG = {{ type.type_name }},
+			PROCEDURE = {{ type.type_name }}_ge,
+			COMMUTATOR = <= ,
+			NEGATOR = < ,
+			RESTRICT = scalargesel,
+			JOIN = scalargejoinsel
+		);
+		COMMENT ON OPERATOR >=({{ type.type_name }}, {{ type.type_name }}) IS 'greater-than-or-equal';
+
+	END IF;
+END;
+$$;
+
+CREATE OPERATOR CLASS btree_{{ type.type_name }}_ops
+DEFAULT FOR TYPE {{ type.type_name }} USING btree
+AS
+	OPERATOR        1       <  ,
+	OPERATOR        2       <= ,
+	OPERATOR        3       =  ,
+	OPERATOR        4       >= ,
+	OPERATOR        5       >  ,
+	FUNCTION        1       {{ type.type_name }}_cmp({{ type.type_name }}, {{ type.type_name }});
+
+CREATE OPERATOR CLASS hash_{{ type.type_name }}_ops
+DEFAULT FOR TYPE {{ type.type_name }} USING hash
+AS
+	OPERATOR        1       = ,
+	FUNCTION        1       hash_{{ type.type_name }}({{ type.type_name }});
+
+-- {{ type.type_name }} SQL-callable functions
+
+CREATE FUNCTION {{ type.type_name }}_get_list()
+RETURNS text[]
+AS 'MODULE_PATHNAME'
+LANGUAGE C IMMUTABLE PARALLEL SAFE;
+
+{% endfor %}
