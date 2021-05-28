@@ -22,4 +22,6 @@
 *.hex
 *.swp
 test/results
+test/regression.diffs
+test/regression.out
 venv/
