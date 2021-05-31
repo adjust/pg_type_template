@@ -8,6 +8,6 @@ setup(
     package_data={"pg_type_template": ["templates/*",
                                         "templates/*/*",
                                         "templates/*/*/*",
-                                        "templates/.github/workflow/*",
+                                        "templates/.github/workflows/*",
                                         "templates/.gitignore"]}
 )
