@@ -1,0 +1,37 @@
+\t
+SET max_parallel_workers_per_gather=4;
+SET force_parallel_mode=on;
+set parallel_setup_cost = 10;
+set parallel_tuple_cost = 0.001;
+CREATE TABLE {{ type_name }}_parallel(v {{ type_name }}) WITH (parallel_workers = 4);
+INSERT INTO {{ type_name }}_parallel(v)
+	SELECT values.v
+	FROM generate_series(1,1e4) i,
+	LATERAL (SELECT v FROM {{ type_name }}_table ORDER BY random() LIMIT 1) values;
+EXPLAIN (costs off, verbose)
+SELECT COUNT(*) FROM {{ type_name }}_parallel WHERE v = '{{ type_values[0].name }}';
+ Finalize Aggregate
+   Output: count(*)
+   ->  Gather
+         Output: (PARTIAL count(*))
+         Workers Planned: 4
+         ->  Partial Aggregate
+               Output: PARTIAL count(*)
+               ->  Parallel Seq Scan on public.{{ type_name }}_parallel
+                     Filter: ({{ type_name }}_parallel.v = '{{ type_values[0].name }}'::{{ type_name }})
+
+EXPLAIN (costs off, verbose)
+SELECT v, COUNT(*) FROM {{ type_name }}_parallel GROUP BY 1;
+ Finalize HashAggregate
+   Output: v, count(*)
+   Group Key: {{ type_name }}_parallel.v
+   ->  Gather
+         Output: v, (PARTIAL count(*))
+         Workers Planned: 4
+         ->  Partial HashAggregate
+               Output: v, PARTIAL count(*)
+               Group Key: {{ type_name }}_parallel.v
+               ->  Parallel Seq Scan on public.{{ type_name }}_parallel
+                     Output: v
+
+
