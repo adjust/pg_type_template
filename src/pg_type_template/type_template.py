@@ -14,6 +14,10 @@ class TypeTemplate:
         self.env.filters["uint8_name"] = uint8_name
 
     def render_to_dir(self, dest_dir):
+        # Sort type values by their names
+        for model_type in self.model["types"]:
+            model_type["type_values"] = sorted(model_type["type_values"], key=lambda t: t["name"])
+
         for template_name in self.env.list_templates():
             template = self.env.get_template(template_name)
 

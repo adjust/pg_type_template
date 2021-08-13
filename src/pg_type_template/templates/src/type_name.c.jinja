@@ -81,7 +81,7 @@ pg_type_from_str(const char *str)
 									 PG_TYPE_NUM,
 									 sizeof(PgTypeStruct),
 									 pg_type_item_cmp);
-	if (!found)
+	if (found == NULL)
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("unknown input value: %s", str)));
