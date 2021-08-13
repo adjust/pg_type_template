@@ -181,7 +181,7 @@ Datum
 		pg_type_list_initialized = true;
 	}
 
-	for (int i = 0; i < PG_TYPE_NUM; i++)
+	for (int i = 0; i < PG_UINT8_MAX + 1; i++)
 	{
 		if (pg_type_list[i].name == NULL)
 			continue;
