@@ -4,6 +4,12 @@ import shutil
 
 from jinja2 import Environment, PackageLoader
 
+def sort_by_name(value):
+    return sorted(value, key=lambda t: t["name"])
+
+def sort_by_value(value):
+    return sorted(value, key=lambda t: t["value"])
+
 def uint8_name(value):
     return value.upper().replace(" ", "_").replace("-", "_")
 
@@ -12,6 +18,8 @@ class TypeTemplate:
         self.model = model
         self.env = Environment(loader=PackageLoader(__package__), trim_blocks=True)
         self.env.filters["uint8_name"] = uint8_name
+        self.env.filters["sort_by_name"] = sort_by_name
+        self.env.filters["sort_by_value"] = sort_by_value
 
     def render_to_dir(self, dest_dir):
         for template_name in self.env.list_templates():

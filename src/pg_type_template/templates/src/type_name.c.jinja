@@ -16,7 +16,7 @@ typedef uint8 pg_type;
  * Type values as uint8, this definition should correspond to PG_TYPE_NAMES
  * array entries.
  */
-{% for item in type_values %}
+{% for item in type_values|sort_by_name %}
 #define PG_{{ item.name|uint8_name }} {{ item.value }}
 {% endfor %}
 
@@ -25,7 +25,7 @@ typedef uint8 pg_type;
  * indexes above.
  */
 #define PG_TYPE_NAMES { \
-{% for item in type_values %}
+{% for item in type_values|sort_by_name %}
 	{ PG_{{ item.name|uint8_name }}, "{{ item.name }}" }{{ ", " if not loop.last else "" }} \
 {% endfor %}
 	}
@@ -81,7 +81,7 @@ pg_type_from_str(const char *str)
 									 PG_TYPE_NUM,
 									 sizeof(PgTypeStruct),
 									 pg_type_item_cmp);
-	if (!found)
+	if (found == NULL)
 		ereport(ERROR,
 				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 				 errmsg("unknown input value: %s", str)));
@@ -95,6 +95,8 @@ pg_type_from_str(const char *str)
 static void
 pg_type_list_initialize(void)
 {
+	MemSet(pg_type_list, 0, sizeof(pg_type_list));
+
 	for (int i = 0; i < PG_TYPE_NUM; i++)
 	{
 		const PgTypeStruct *item = &pg_type_list_sorted[i];
@@ -173,10 +175,19 @@ Datum
 {
 	ArrayBuildState *astate = NULL;
 
-	for (int i = 0; i < PG_TYPE_NUM; i++)
+	if (!pg_type_list_initialized)
 	{
+		pg_type_list_initialize();
+		pg_type_list_initialized = true;
+	}
+
+	for (int i = 0; i < PG_UINT8_MAX + 1; i++)
+	{
+		if (pg_type_list[i].name == NULL)
+			continue;
+
 		astate = accumArrayResult(astate,
-								  CStringGetTextDatum(pg_type_list_sorted[i].name),
+								  CStringGetTextDatum(pg_type_list[i].name),
 								  false, TEXTOID, CurrentMemoryContext);
 	}
 
