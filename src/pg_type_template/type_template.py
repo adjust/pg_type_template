@@ -5,7 +5,7 @@ import shutil
 from jinja2 import Environment, PackageLoader
 
 def uint8_name(value):
-    return value.upper().replace(" ", "_")
+    return value.upper().replace(" ", "_").replace("-", "_")
 
 class TypeTemplate:
     def __init__(self, model):
