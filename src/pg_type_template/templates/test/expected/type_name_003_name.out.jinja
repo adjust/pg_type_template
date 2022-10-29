@@ -1,5 +1,6 @@
 \t
-SELECT v::text::{{ type_name }}
+-- Use UPPER() to test case insensitivity
+SELECT UPPER(v::text)::{{ type_name }}
 FROM {{ type_name }}_table;
 {% for item in type_values %}
  {{ item.name }}
