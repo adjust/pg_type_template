@@ -11,11 +11,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [13, 12, 11, 10]
+        pg: [14, 13, 12, 11, 10]
     name: 🐘 PostgreSQL ${{ matrix.pg }}
     runs-on: ubuntu-latest
-    container: zilder/pg-ext-check
+    container: pgxn/pgxn-tools
     steps:
-      - run: pg-setup ${{ matrix.pg }}
+      - run: pg-start ${{ matrix.pg }}
       - uses: actions/checkout@v2
-      - run: build-check
+      - run: pg-build-test
