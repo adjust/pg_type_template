@@ -15,3 +15,4 @@ SELECT COUNT(*) FROM {{ type_name }}_parallel WHERE v = '{{ type_values[0].name 
 
 EXPLAIN (costs off, verbose)
 SELECT v, COUNT(*) FROM {{ type_name }}_parallel GROUP BY 1;
+

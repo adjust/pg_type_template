@@ -18,3 +18,4 @@ SELECT v FROM {{ type_name }}_index WHERE v = '{{ type_values[0].name }}';
  Index Scan using {{ type_name }}_index_hash on {{ type_name }}_index
    Index Cond: (v = '{{ type_values[0].name }}'::{{ type_name }})
 
+

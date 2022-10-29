@@ -1,5 +1,4 @@
 \t
-
 CREATE TABLE {{ type_name }}_index(v {{ type_name }});
 INSERT INTO {{ type_name }}_index(v)
 	SELECT values.v
@@ -18,3 +17,4 @@ CREATE INDEX {{ type_name }}_index_hash ON {{ type_name }}_index USING hash(v);
 
 EXPLAIN (COSTS OFF, TIMING OFF)
 SELECT v FROM {{ type_name }}_index WHERE v = '{{ type_values[0].name }}';
+
