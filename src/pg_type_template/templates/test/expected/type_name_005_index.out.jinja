@@ -7,14 +7,14 @@ INSERT INTO {{ type_name }}_index(v)
 SET enable_seqscan TO false;
 CREATE INDEX {{ type_name }}_index_btree ON {{ type_name }}_index USING btree(v);
 EXPLAIN (COSTS OFF, TIMING OFF)
-SELECT v FROM {{ type_name }}_index WHERE v = 'medium';
+SELECT v FROM {{ type_name }}_index WHERE v = '{{ type_values[0].name }}';
  Index Only Scan using {{ type_name }}_index_btree on {{ type_name }}_index
-   Index Cond: (v = 'medium'::{{ type_name }})
+   Index Cond: (v = '{{ type_values[0].name }}'::{{ type_name }})
 
 DROP INDEX {{ type_name }}_index_btree;
 CREATE INDEX {{ type_name }}_index_hash ON {{ type_name }}_index USING hash(v);
 EXPLAIN (COSTS OFF, TIMING OFF)
-SELECT v FROM {{ type_name }}_index WHERE v = 'medium';
+SELECT v FROM {{ type_name }}_index WHERE v = '{{ type_values[0].name }}';
  Index Scan using {{ type_name }}_index_hash on {{ type_name }}_index
-   Index Cond: (v = 'medium'::{{ type_name }})
+   Index Cond: (v = '{{ type_values[0].name }}'::{{ type_name }})
 
