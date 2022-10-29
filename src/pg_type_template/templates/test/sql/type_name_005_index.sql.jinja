@@ -1,0 +1,20 @@
+\t
+
+CREATE TABLE {{ type_name }}_index(v {{ type_name }});
+INSERT INTO {{ type_name }}_index(v)
+	SELECT values.v
+	FROM generate_series(1,1e2) i,
+	LATERAL (SELECT v FROM {{ type_name }}_table ORDER BY random() LIMIT 1) values;
+
+SET enable_seqscan TO false;
+
+CREATE INDEX {{ type_name }}_index_btree ON {{ type_name }}_index USING btree(v);
+
+EXPLAIN (COSTS OFF, TIMING OFF)
+SELECT v FROM {{ type_name }}_index WHERE v = 'medium';
+
+DROP INDEX {{ type_name }}_index_btree;
+CREATE INDEX {{ type_name }}_index_hash ON {{ type_name }}_index USING hash(v);
+
+EXPLAIN (COSTS OFF, TIMING OFF)
+SELECT v FROM {{ type_name }}_index WHERE v = 'medium';

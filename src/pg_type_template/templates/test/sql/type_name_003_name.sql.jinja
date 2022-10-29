@@ -1,4 +1,5 @@
 \t
+-- Use UPPER() to test case insensitivity
 SELECT UPPER(v::text)::{{ type_name }}
 FROM {{ type_name }}_table;
 
