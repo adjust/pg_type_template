@@ -19,9 +19,9 @@ model = {
         {
             "type_name": "example_type",
             "type_values": [
-                { "name": "value 1", "value": 60 },
-                { "name": "value 2", "value": 120 },
-                { "name": "value 3", "value": 180 },
+                { "name": "enum 1", "value": 60 },
+                { "name": "enum 2", "value": 120 },
+                { "name": "enum 3", "value": 180 },
                 { "name": "unknown", "value": 255 },
             ]
         }
