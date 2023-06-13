@@ -116,11 +116,6 @@ pg_type_to_str(pg_type c)
 		pg_type_list_initialized = true;
 	}
 
-	if (c >= PG_UINT8_MAX + 1)
-		ereport(ERROR,
-				(errcode(ERRCODE_INVALID_PARAMETER_VALUE),
-				 errmsg("unexpected type value: %d", c)));
-
 	res = &pg_type_list[c];
 	if (res->name == NULL)
 		ereport(ERROR,
