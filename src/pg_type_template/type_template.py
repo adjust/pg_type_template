@@ -4,11 +4,13 @@ import shutil
 
 from jinja2 import Environment, PackageLoader
 
+
 def sort_by_name(value):
     """
     Jinja filter which sorts C macros by their names.
     """
     return sorted(value, key=lambda t: t["name"])
+
 
 def uint8_name(value):
     """
@@ -16,10 +18,12 @@ def uint8_name(value):
     """
     return value.upper().replace(" ", "_").replace("-", "_")
 
+
 class TypeTemplate:
     """
     A class that generates PostgreSQL extensions which adds new enum data type.
     """
+
     def __init__(self, model):
         self.check_values(model)
 
@@ -38,9 +42,17 @@ class TypeTemplate:
         for model_type in model["types"]:
             for type_values in model_type["type_values"]:
                 if type_values["value"] < 0 or type_values["value"] > 255:
-                    raise ValueError(f"value '{type_values['value']}' of '{type_values['name']}' is out of range")
+                    raise ValueError(
+                        f"value '{type_values['value']}' of '{type_values['name']}' is out of range"
+                    )
 
     def render_to_dir(self, dest_dir):
+        # We will need root level keys to pass it together with a type model
+        # into a template
+        root_model = dict(
+            (k, v) for k, v in self.model.items() if not isinstance(v, dict)
+        )
+
         """
         Generate new PostgreSQL extension into dest_dir directory.
         """
@@ -54,20 +66,34 @@ class TypeTemplate:
 
             # If it isn't template file just copy it
             if file_ext != ".jinja":
-                shutil.copyfile(template.filename,
-                    os.path.join(dest_dir, template.name))
+                shutil.copyfile(
+                    str(template.filename), os.path.join(dest_dir, str(template.name))
+                )
             else:
                 template_root = template_name.split(os.path.sep)[0]
 
                 if template_root in ["src", "test"]:
+                    add_module_magic = True
+
                     for model_type in self.model["types"]:
-                        template.stream(model_type).dump(
-                            os.path.join(dest_dir,
-                                file_path.replace("type_name", model_type["type_name"])
-                            ))
+                        template.stream(
+                            model_type
+                            | root_model
+                            | {"add_module_magic": add_module_magic}
+                        ).dump(
+                            os.path.join(
+                                dest_dir,
+                                file_path.replace("type_name", model_type["type_name"]),
+                            )
+                        )
+
+                        add_module_magic = False
                 else:
                     template.stream(self.model).dump(
-                        os.path.join(dest_dir,
-                            file_path.replace("ext_name", self.model["ext_name"])
-                                .replace("ext_version", self.model["ext_version"])
-                        ))
+                        os.path.join(
+                            dest_dir,
+                            file_path.replace(
+                                "ext_name", self.model["ext_name"]
+                            ).replace("ext_version", self.model["ext_version"]),
+                        )
+                    )
