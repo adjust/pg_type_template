@@ -8,7 +8,9 @@
 #include "utils/array.h"
 #include "utils/builtins.h"
 
+{% if add_module_magic is defined and add_module_magic %}
 PG_MODULE_MAGIC;
+{% endif %}
 
 typedef uint8 pg_type;
 

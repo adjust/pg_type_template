@@ -1,5 +1,6 @@
 \t
-CREATE EXTENSION {{ type_name }};
+SET client_min_messages TO WARNING;
+CREATE EXTENSION IF NOT EXISTS {{ ext_name }};
 
 CREATE TABLE {{ type_name }}_table (v {{ type_name }});
 
