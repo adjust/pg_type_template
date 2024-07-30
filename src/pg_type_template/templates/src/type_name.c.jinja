@@ -175,7 +175,6 @@ Datum
 {{ type_name }}_get_list(PG_FUNCTION_ARGS)
 {
 	ArrayBuildState *astate = NULL;
-	ArrayType *array;
 
 	if (!pg_type_list_initialized)
 	{
