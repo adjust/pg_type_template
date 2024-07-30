@@ -175,6 +175,7 @@ Datum
 {{ type_name }}_get_list(PG_FUNCTION_ARGS)
 {
 	ArrayBuildState *astate = NULL;
+	ArrayType *array;
 
 	if (!pg_type_list_initialized)
 	{
@@ -193,5 +194,6 @@ Datum
 	}
 
 	Assert(astate != NULL);
-	PG_RETURN_ARRAYTYPE_P(makeArrayResult(astate, CurrentMemoryContext));
+    array = (ArrayType *) makeArrayResult(astate, CurrentMemoryContext);
+    PG_RETURN_ARRAYTYPE_P(array);
 }
