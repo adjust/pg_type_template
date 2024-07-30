@@ -193,6 +193,5 @@ Datum
 	}
 
 	Assert(astate != NULL);
-    array = (ArrayType *) makeArrayResult(astate, CurrentMemoryContext);
-    PG_RETURN_ARRAYTYPE_P(array);
+    PG_RETURN_DATUM(makeArrayResult(astate, CurrentMemoryContext));
 }
