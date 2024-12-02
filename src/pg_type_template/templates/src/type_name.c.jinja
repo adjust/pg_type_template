@@ -193,5 +193,5 @@ Datum
 	}
 
 	Assert(astate != NULL);
-    PG_RETURN_DATUM(makeArrayResult(astate, CurrentMemoryContext));
+	PG_RETURN_DATUM(makeArrayResult(astate, CurrentMemoryContext));
 }
