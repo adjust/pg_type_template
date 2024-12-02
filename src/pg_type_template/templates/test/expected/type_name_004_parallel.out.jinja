@@ -10,7 +10,6 @@ BEGIN
         EXECUTE 'SET force_parallel_mode = on';
     END IF;
 END $$;
-
 CREATE TABLE {{ type_name }}_parallel(v {{ type_name }}) WITH (parallel_workers = 4);
 INSERT INTO {{ type_name }}_parallel(v)
 	SELECT values.v
