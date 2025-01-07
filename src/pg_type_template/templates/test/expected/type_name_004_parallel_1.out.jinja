@@ -1,8 +1,15 @@
 \t
 SET max_parallel_workers_per_gather=4;
-SET force_parallel_mode=on;
-set parallel_setup_cost = 10;
-set parallel_tuple_cost = 0.001;
+SET parallel_setup_cost = 10;
+SET parallel_tuple_cost = 0.001;
+DO $$
+BEGIN
+    IF current_setting('server_version_num')::int >= 160000 THEN
+        SET debug_parallel_query = on;
+    ELSE
+        SET force_parallel_mode = on;
+    END IF;
+END $$;
 CREATE TABLE {{ type_name }}_parallel(v {{ type_name }}) WITH (parallel_workers = 4);
 INSERT INTO {{ type_name }}_parallel(v)
 	SELECT values.v
