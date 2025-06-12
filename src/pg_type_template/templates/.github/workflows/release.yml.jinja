@@ -7,7 +7,7 @@ jobs:
   release:
     strategy:
       matrix:
-        pg: [16, 15, 14, 13, 12, 11, 10]
+        pg: [17, 16, 15, 14, 13, 12, 11, 10]
     name: Release PostgreSQL {% raw %}${{ matrix.pg }}{% endraw %} on GitHub
     runs-on: ubuntu-latest
     env:
@@ -37,20 +37,21 @@ jobs:
           make PG_CONFIG=$PG_CONFIG
           
           # Create output directory structure
-          mkdir -p build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}
+          mkdir -p build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}
+          mkdir -p build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}
           
           # Copy built files
-          cp {{ ext_name }}.so build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}/
-          cp {{ ext_name }}.control build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}/
-          cp {{ ext_name }}--*.sql build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}/
+          cp {{ ext_name }}.so build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
+          cp {{ ext_name }}.control build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
+          cp {{ ext_name }}--*.sql build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
           
           # Create archive with version info
           cd build
           tar -czf {{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}-${GITHUB_REF#refs/tags/}.tar.gz {{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}/
 
       - name: Upload binaries to release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}-{% raw %}${{ github.ref_name }}{% endraw %}.tar.gz
+          files: build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}.tar.gz
           token: ${{ "{{" }} secrets.{{ github_action_token_name|default('GITHUB_TOKEN') }} {{ "}}" }}  
           fail_on_unmatched_files: true
