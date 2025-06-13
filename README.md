@@ -25,7 +25,9 @@ model = {
                 { "name": "unknown", "value": 255 },
             ]
         }
-    ]
+    ],
+    # optional value defaults "GITHUB_TOKEN"
+    "github_action_token_name": "GITHUB_TOKEN"
 }
 templ = pg_type_template.TypeTemplate(model)
 templ.render_to_dir(".")
