@@ -38,8 +38,7 @@ jobs:
           
           # Create output directory structure
           mkdir -p build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}
-          mkdir -p build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}
-          
+
           # Copy built files
           cp {{ ext_name }}.so build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
           cp {{ ext_name }}.control build/{{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
@@ -47,7 +46,7 @@ jobs:
           
           # Create archive with version info
           cd build
-          tar -czf {{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}-${GITHUB_REF#refs/tags/}.tar.gz {{ ext_name }}-pg{% raw %}${{ matrix.pg }}{% endraw %}/
+          tar -czf {{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}.tar.gz {{ ext_name }}-pg{% raw %}${{ matrix.pg }}-${{ github.ref_name }}{% endraw %}/
 
       - name: Upload binaries to release
         uses: softprops/action-gh-release@v2
